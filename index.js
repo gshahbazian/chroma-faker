@@ -3,7 +3,7 @@
 import { ChromaClient } from 'chromadb'
 import { faker } from '@faker-js/faker'
 
-const RECORDS_TO_GENERATE = 340
+const RECORDS_TO_GENERATE = 750
 
 // PASTE CHROME CONNECT STRING HERE
 
@@ -20,57 +20,21 @@ const client = new ChromaClient({
 
 // END PASTE
 
+const MAX_BATCH_SIZE = 20
+
 async function generateAndLoadData() {
   try {
     const collection = await client.getOrCreateCollection({
       name: 'faker',
-      metadata: { description: 'Sample collection with faker generated data' },
     })
 
-    const documents = []
-    const metadatas = []
-    const ids = []
-
-    for (let i = 0; i < RECORDS_TO_GENERATE; i++) {
-      const document = faker.lorem.paragraphs(3)
-
-      const metadata = {
-        author: faker.person.fullName(),
-        created_date: faker.date.past({ years: 2 }).toISOString().split('T')[0],
-        category: faker.helpers.arrayElement([
-          'tech',
-          'science',
-          'business',
-          'health',
-        ]),
-        word_count: document.split(' ').length,
-        language: 'en',
-        priority_score: Number(
-          faker.number.float({ min: 0, max: 10, precision: 0.01 }).toFixed(2),
-        ),
-        is_reviewed: faker.datatype.boolean(),
-        department: faker.commerce.department(),
-        location: faker.location.city(),
-        country_code: faker.location.countryCode(),
-        source_url: faker.internet.url(),
-        reading_time_minutes: faker.number.int({ min: 3, max: 15 }),
-      }
-
-      documents.push(document)
-      metadatas.push(metadata)
-      ids.push(`doc_${i}`)
+    const batchCount = Math.ceil(RECORDS_TO_GENERATE / MAX_BATCH_SIZE)
+    for (let i = 0; i < batchCount; i++) {
+      await insertBatch(collection, i)
     }
 
-    await collection.add({
-      documents,
-      metadatas,
-      ids,
-    })
-
-    console.log(`Added ${documents.length} documents to the collection`)
-
     const result = await collection.get({
-      ids: [ids[0]],
+      ids: ['doc_1'],
     })
 
     console.log('\n\n')
@@ -94,6 +58,45 @@ async function generateAndLoadData() {
   } catch (error) {
     console.error('Error:', error)
   }
+}
+
+async function insertBatch(collection, batchNumber) {
+  const documents = []
+  const metadatas = []
+  const ids = []
+
+  const previouslyInsertedRecords = batchNumber * MAX_BATCH_SIZE
+  const recordsToGenerate = Math.min(
+    RECORDS_TO_GENERATE - previouslyInsertedRecords,
+    MAX_BATCH_SIZE,
+  )
+
+  for (let i = 0; i < recordsToGenerate; i++) {
+    const document = faker.lorem.paragraphs(1)
+
+    const metadata = {
+      author: faker.person.fullName(),
+      created_date: faker.date.past({ years: 2 }).toISOString().split('T')[0],
+      category: faker.helpers.arrayElement([
+        'tech',
+        'science',
+        'business',
+        'health',
+      ]),
+    }
+
+    documents.push(document)
+    metadatas.push(metadata)
+    ids.push(`doc_${i + previouslyInsertedRecords + 1}`)
+  }
+
+  await collection.add({
+    documents,
+    metadatas,
+    ids,
+  })
+
+  console.log(`Added ${documents.length} documents to the collection`)
 }
 
 generateAndLoadData()
