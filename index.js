@@ -3,7 +3,8 @@
 import { ChromaClient } from 'chromadb'
 import { faker } from '@faker-js/faker'
 
-const RECORDS_TO_GENERATE = 750
+const COLLECTIONS_TO_GENERATE = 7
+const RECORDS_TO_GENERATE = 15
 
 // PASTE CHROME CONNECT STRING HERE
 
@@ -20,15 +21,21 @@ const client = new ChromaClient({
 
 // END PASTE
 
-const MAX_BATCH_SIZE = 20
+const RECORD_BATCH_SIZE = 20
 
-async function generateAndLoadData() {
+async function generateAndLoadData(colNumber) {
   try {
+    console.log('\n\n')
+    console.log('=========')
+
+    const name = `col_${colNumber}`
+    console.log(`Generating collection: ${name}`)
+
     const collection = await client.getOrCreateCollection({
-      name: 'faker',
+      name,
     })
 
-    const batchCount = Math.ceil(RECORDS_TO_GENERATE / MAX_BATCH_SIZE)
+    const batchCount = Math.ceil(RECORDS_TO_GENERATE / RECORD_BATCH_SIZE)
     for (let i = 0; i < batchCount; i++) {
       await insertBatch(collection, i)
     }
@@ -65,10 +72,10 @@ async function insertBatch(collection, batchNumber) {
   const metadatas = []
   const ids = []
 
-  const previouslyInsertedRecords = batchNumber * MAX_BATCH_SIZE
+  const previouslyInsertedRecords = batchNumber * RECORD_BATCH_SIZE
   const recordsToGenerate = Math.min(
     RECORDS_TO_GENERATE - previouslyInsertedRecords,
-    MAX_BATCH_SIZE,
+    RECORD_BATCH_SIZE,
   )
 
   for (let i = 0; i < recordsToGenerate; i++) {
@@ -96,7 +103,11 @@ async function insertBatch(collection, batchNumber) {
     ids,
   })
 
-  console.log(`Added ${documents.length} documents to the collection`)
+  console.log(
+    `Added ${documents.length} documents to the collection ${collection.name}`,
+  )
 }
 
-generateAndLoadData()
+for (let i = 1; i <= COLLECTIONS_TO_GENERATE; i++) {
+  await generateAndLoadData(i)
+}
