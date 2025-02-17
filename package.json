@@ -1,22 +1,20 @@
 {
   "name": "chroma-faker",
-  "version": "1.0.0",
-  "main": "index.js",
+  "module": "index.ts",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "format": "prettier --write ."
   },
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "devDependencies": {
+    "@types/bun": "latest",
+    "prettier": "3.5.1"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
   "dependencies": {
-    "@faker-js/faker": "^9.3.0",
-    "chromadb": "^1.10.0",
-    "chromadb-default-embed": "^2.13.2",
-    "prettier": "^3.4.2"
-  },
-  "bin": {
-    "run": "./index.js"
-  },
-  "type": "module"
+    "@faker-js/faker": "^9.5.0",
+    "chromadb": "^1.10.4",
+    "chromadb-default-embed": "^2.13.2"
+  }
 }

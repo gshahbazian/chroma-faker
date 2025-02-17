@@ -1,10 +1,8 @@
-#!/usr/bin/env node
-
-import { ChromaClient } from 'chromadb'
+import { ChromaClient, Collection } from 'chromadb'
 import { faker } from '@faker-js/faker'
 
-const COLLECTIONS_TO_GENERATE = 7
-const RECORDS_TO_GENERATE = 15
+const COLLECTIONS_TO_GENERATE = 3
+const RECORDS_TO_GENERATE = 115
 
 // PASTE CHROME CONNECT STRING HERE
 
@@ -23,7 +21,7 @@ const client = new ChromaClient({
 
 const RECORD_BATCH_SIZE = 20
 
-async function generateAndLoadData(colNumber) {
+async function generateAndLoadData(colNumber: number) {
   try {
     console.log('\n\n')
     console.log('=========')
@@ -50,7 +48,7 @@ async function generateAndLoadData(colNumber) {
     console.log('Metadata:', result.metadatas[0])
     console.log(
       'First 200 chars of document:',
-      result.documents[0].substring(0, 200),
+      result.documents[0]?.substring(0, 200),
     )
 
     // Example query
@@ -67,7 +65,7 @@ async function generateAndLoadData(colNumber) {
   }
 }
 
-async function insertBatch(collection, batchNumber) {
+async function insertBatch(collection: Collection, batchNumber: number) {
   const documents = []
   const metadatas = []
   const ids = []
