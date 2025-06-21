@@ -1,20 +1,16 @@
-import { ChromaClient, Collection } from 'chromadb'
+import { type Collection } from 'chromadb'
 import { faker } from '@faker-js/faker'
+import { createClient } from './client'
 
 const COLLECTIONS_TO_GENERATE = 3
 const RECORDS_TO_GENERATE = 115
 
 // PASTE CHROME CONNECT STRING HERE
 
-const client = new ChromaClient({
-  path: 'http://localhost:8000',
-  auth: {
-    provider: 'token',
-    credentials: 'YOUR_API_KEY',
-    tokenHeaderType: 'X_CHROMA_TOKEN',
-  },
-  tenant: 'tenantuuid',
-  database: 'databaseslug',
+const client = createClient({
+  apiKey: 'YOUR_API_KEY',
+  tenant: 'YOUR_TENANT_NAME',
+  database: 'YOUR_DATABASE_NAME',
 })
 
 // END PASTE
