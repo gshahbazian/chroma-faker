@@ -14,15 +14,10 @@ const COLLECTION_NAME = 'uploaded'
 
 const collection = await client.getCollection({
   name: COLLECTION_NAME,
-  embeddingFunction: {
-    generate: async (texts: string[]) => {
-      return texts.map(() => new Array(1536).fill(0))
-    },
-  },
 })
 
 const result = await collection.get({
-  limit: 150,
+  limit: 50,
   include: ['documents', 'metadatas', 'embeddings'],
 })
 
