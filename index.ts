@@ -1,6 +1,15 @@
-import { type Collection } from 'chromadb'
+import {
+  DOCUMENT_KEY,
+  Schema,
+  SparseVectorIndexConfig,
+  SparseVectorIndexType,
+  VectorIndexConfig,
+  type Collection,
+} from 'chromadb'
 import { faker } from '@faker-js/faker'
 import { createClient } from './client'
+import { ChromaBm25EmbeddingFunction } from '@chroma-core/chroma-bm25'
+import { DefaultEmbeddingFunction } from '@chroma-core/default-embed'
 
 const COLLECTIONS_TO_GENERATE = 3
 const RECORDS_TO_GENERATE = 115
@@ -22,11 +31,34 @@ async function generateAndLoadData(colNumber: number) {
     console.log('\n\n')
     console.log('=========')
 
-    const name = `col_${colNumber}`
+    const name = `col_sparse_${colNumber}`
     console.log(`Generating collection: ${name}`)
+
+    const metadata = {
+      author: faker.person.fullName(),
+      created_date: faker.date.past({ years: 2 }).toISOString().split('T')[0],
+    }
+
+    const schema = new Schema()
+    schema.createIndex(
+      new SparseVectorIndexConfig({
+        sourceKey: DOCUMENT_KEY,
+        embeddingFunction: new ChromaBm25EmbeddingFunction(),
+        bm25: true,
+      }),
+      'bm25_sparse_vector',
+    )
+    schema.createIndex(
+      new VectorIndexConfig({
+        space: 'cosine',
+        embeddingFunction: new DefaultEmbeddingFunction(),
+      }),
+    )
 
     const collection = await client.getOrCreateCollection({
       name,
+      metadata,
+      schema,
     })
 
     const batchCount = Math.ceil(RECORDS_TO_GENERATE / RECORD_BATCH_SIZE)
